@@ -1,0 +1,92 @@
+name: release
+
+on: workflow_dispatch
+
+jobs:
+  create-new-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      assets_url: ${{ steps.create-release.outputs.upload_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Create release
+        id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.run_number }}
+          release_name: Release Title
+          body_path: CHANGELOG.md
+          draft: true
+  release-win64:
+    runs-on: windows-latest
+    needs: create-new-release
+    permissions:
+      contents: write
+    outputs:
+      assets_url: ${{ steps.create-release.outputs.upload_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install CMake
+        uses: lukka/get-cmake@latest
+      - name: Init submodules
+        run: git submodule update --init --recursive
+      - name: CMake - Configure
+        run: cmake . --preset Windows-x64-Release -DCMAKE_BUILD_TYPE="Release" -DCOUT_FILE_SUFFIX="x64"
+      - name: CMake - Build
+        run: cmake --build --preset Windows-x64-Release
+      - name: Archive output files
+        run: Compress-Archive -Path "g2ows.json", "out/build/Windows-x64-Release/G2OWS.dll" -Destination Windows-x64-Release.zip
+      - name: Upload release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-new-release.outputs.assets_url }}
+          asset_path: ./Windows-x64-Release.zip
+          asset_name: Windows-x64-Release.zip
+          asset_content_type: application/zip
+  release-arm64:
+    runs-on: ubuntu-latest
+    needs: create-new-release
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install CMake
+        uses: lukka/get-cmake@latest
+      - name: Init submodules
+        run: git submodule update --init --recursive
+      - name: CMake - Configure
+        run: cmake . --preset Linux-x64-Release -DCMAKE_BUILD_TYPE="Release" -DCOUT_FILE_SUFFIX="x64"
+      - name: CMake - Build
+        run: cmake --build --preset Linux-x64-Release
+      - name: Archive files
+        uses: montudor/action-zip@v1
+        with:
+          args: zip -r Linux-x64-Release.zip g2ows.json out/build/Linux-x64-Release/libG2OWS.so
+      - name: Upload release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-new-release.outputs.assets_url }}
+          asset_path: ./Linux-x64-Release.zip
+          asset_name: Linux-x64-Release.zip
+          asset_content_type: application/zip
