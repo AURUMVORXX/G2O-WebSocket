@@ -1,4 +1,3 @@
 ## Changelog
 
-- Removed unnecessary print of whitelist hosts
-- Fixed description for ``websocket_close`` function in README
+- Potential fix for occuring exception on server shutdown (CTRL + C)

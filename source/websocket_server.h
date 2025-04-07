@@ -13,6 +13,8 @@ public:
     WebsocketServer(int port);
     ~WebsocketServer();
     
+    void Shutdown();
+    
     void RegisterEvents();
     std::optional<const std::shared_ptr<ix::WebSocket>> GetClient(std::string);
     std::set<std::shared_ptr<ix::WebSocket>> GetClients() { return _server.getClients(); }

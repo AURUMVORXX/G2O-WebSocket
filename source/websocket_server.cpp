@@ -39,11 +39,18 @@ void WebsocketServer::RegisterEvents()
 
 WebsocketServer::~WebsocketServer()
 {
+    Shutdown();
+}
+
+void WebsocketServer::Shutdown()
+{
     if(_initialized)
     {
         _server.stop();
         if (_serverThread.joinable())
             _serverThread.join();
+            
+        _initialized = false;
     }
 }
 
