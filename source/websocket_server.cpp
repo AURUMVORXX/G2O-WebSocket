@@ -1,7 +1,6 @@
 #include <ixwebsocket/IXWebSocketServer.h>
 #include <sqapi.h>
 #include <vector>
-#include <iostream>
 
 #include "json_config.h"
 #include "websocket_server.h"
@@ -62,10 +61,6 @@ std::optional<const std::shared_ptr<ix::WebSocket>> WebsocketServer::GetClient(s
 bool WebsocketServer::ValidateWhitelist(std::string ip)
 {
     std::vector<std::string> whitelist = JSONConfig::Get().GetWhitelist();
-    for (auto s : whitelist)
-    {
-        std::cout << s << std::endl;
-    }
     return std::find(whitelist.begin(), whitelist.end(), ip) != whitelist.end();
 }
 

@@ -26,7 +26,7 @@ onWebsocketClose(string: url)   // Triggers on disconnect
 ```cpp
 websocket_send(string: url, std: message)   // Send a message to client with given url
 websocket_sendtoall(string: message)    // Send a message to all clients
-websocket_close(string: url)    // Disconnect client with given url
+websocket_close(string: url, string: reason)    // Disconnect client with given url
 ```
 
 **URL** is a string with following format: ``ws://ip:port``. It is a way to identify clients from each other.
