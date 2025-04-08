@@ -17,6 +17,27 @@ WebsocketServer::WebsocketServer(int port):
         }
     );
     
+    ix::SocketTLSOptions tlsOptions;
+    
+    std::string caFile = JSONConfig::Get().GetCaFile();
+    std::string certFile = JSONConfig::Get().GetCertFile();
+    std::string keyFile = JSONConfig::Get().GetKeyFile();
+    bool useTls = JSONConfig::Get().GetTlsEnabled();
+    bool disableHostnameValidation = JSONConfig::Get().GetDisableHostnameValidation();
+    
+    if (useTls && !certFile.empty() && !keyFile.empty())
+    {
+        tlsOptions.tls = useTls;
+        tlsOptions.certFile = certFile;
+        tlsOptions.keyFile = keyFile;
+        tlsOptions.disable_hostname_validation = disableHostnameValidation;
+        
+        if (!caFile.empty())
+            tlsOptions.caFile = caFile;
+        
+        _server.setTLSOptions(tlsOptions);
+    }
+    
     _serverThread = std::thread(
         [this]
         {

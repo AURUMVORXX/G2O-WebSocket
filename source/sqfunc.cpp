@@ -45,6 +45,22 @@ SQInteger sqwebsocket_send(HSQUIRRELVM vm)
     return 0;
 }
 
+SQInteger sqwebsocket_sendBinary(HSQUIRRELVM vm)
+{
+    const SQChar* url;
+    const SQChar* message;
+    
+    sq_getstring(vm, 2, &url);
+    sq_getstring(vm, 3, &message);
+    
+    if (auto client = g_server->GetClient(url))
+        client.value()->sendBinary(message);
+    else
+        return sq_throwerror(vm, "Not a valid connected websocket url");
+        
+    return 0;
+}
+
 SQInteger sqwebsocket_sendtoall(HSQUIRRELVM vm)
 {
     const SQChar* message;

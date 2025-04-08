@@ -1,6 +1,13 @@
 {
     "port": 8080,
     "sendBinary": false,
+    "tls": {
+        "enabled": false,
+        "certFile": "none",
+        "keyFile": "none",
+        "caFile": "none",
+        "disableHostnameValidation": false
+    },
     "whitelist": [
         
     ]
