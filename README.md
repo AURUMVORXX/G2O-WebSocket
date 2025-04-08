@@ -25,6 +25,7 @@ onWebsocketClose(string: url)   // Triggers on disconnect
 **New Functions:**
 ```cpp
 websocket_send(string: url, std: message)   // Send a message to client with given url
+websocket_sendBinary(string: url, std: message)   // Send a message to client with given url as binary format
 websocket_sendtoall(string: message)    // Send a message to all clients
 websocket_close(string: url, string: reason)    // Disconnect client with given url
 ```
