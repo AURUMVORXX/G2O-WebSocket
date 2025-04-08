@@ -32,15 +32,45 @@ SQInteger sqwebsocket_send(HSQUIRRELVM vm)
     sq_getstring(vm, 2, &url);
     sq_getstring(vm, 3, &message);
     
-    if (auto client = g_server->GetClient(url))
+    try
     {
-        if (JSONConfig::Get().GetBinary())
+        if (auto client = g_server->GetClient(url))
+        {
+            if (JSONConfig::Get().GetBinary())
+                client.value()->sendBinary(message);
+            else
+                client.value()->send(message);
+        }
+        else
+            return sq_throwerror(vm, "Not a valid connected websocket url");
+    }
+    catch (std::exception& e)
+    {
+        return sq_throwerror(vm, e.what());
+    }
+        
+    return 0;
+}
+
+SQInteger sqwebsocket_sendBinary(HSQUIRRELVM vm)
+{
+    const SQChar* url;
+    const SQChar* message;
+    
+    sq_getstring(vm, 2, &url);
+    sq_getstring(vm, 3, &message);
+    
+    try
+    {
+        if (auto client = g_server->GetClient(url))
             client.value()->sendBinary(message);
         else
-            client.value()->send(message);
+            return sq_throwerror(vm, "Not a valid connected websocket url");
     }
-    else
-        return sq_throwerror(vm, "Not a valid connected websocket url");
+    catch(std::exception& e)
+    {
+        return sq_throwerror(vm, e.what());
+    }
         
     return 0;
 }
@@ -51,12 +81,19 @@ SQInteger sqwebsocket_sendtoall(HSQUIRRELVM vm)
     
     sq_getstring(vm, 2, &message);
     
-    for (auto && client : g_server->GetClients())
+    try
     {
-        if (JSONConfig::Get().GetBinary())
-            client->sendBinary(message);
-        else
-            client->send(message);
+        for (auto && client : g_server->GetClients())
+        {
+            if (JSONConfig::Get().GetBinary())
+                client->sendBinary(message);
+            else
+                client->send(message);
+        }
+    }
+    catch (std::exception& e)
+    {
+        return sq_throwerror(vm, e.what());
     }
         
     return 0;

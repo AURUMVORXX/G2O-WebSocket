@@ -26,4 +26,24 @@ JSONConfig::JSONConfig()
         
     if (data.contains("whitelist") && data["whitelist"].is_array())
         _whitelist = data["whitelist"];
+        
+    if (data.contains("tls") && data["tls"].is_object())
+    {
+        json tls = data["tls"];
+        
+        if (tls.contains("certFile") && tls["certFile"].is_string())
+            _certFile = tls["certFile"];
+            
+        if (tls.contains("keyFile") && tls["keyFile"].is_string())
+            _keyFile = tls["keyFile"];
+            
+        if (tls.contains("caFile") && tls["caFile"].is_string())
+            _caFile = tls["caFile"];
+            
+        if (tls.contains("enabled") && tls["enabled"].is_boolean())
+            _useTls = tls["enabled"];
+            
+        if (tls.contains("disableHostnameValidation") && tls["disableHostnameValidation"].is_boolean())
+            _disableHostnameValidation = tls["disableHostnameValidation"];
+    }
 }

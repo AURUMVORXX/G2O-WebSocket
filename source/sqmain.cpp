@@ -34,6 +34,7 @@ extern "C" SQRESULT SQRAT_API sqmodule_load(HSQUIRRELVM vm, HSQAPI api)
 	g_server = std::make_unique<WebsocketServer>(JSONConfig::Get().GetPort());
 	
 	Sqrat::RootTable().SquirrelFunc("websocket_send", sqwebsocket_send, -2, ".ss");
+	Sqrat::RootTable().SquirrelFunc("websocket_sendBinary", sqwebsocket_sendBinary, -2, ".ss");
 	Sqrat::RootTable().SquirrelFunc("websocket_sendtoall", sqwebsocket_sendtoall, -1, ".s");
 	Sqrat::RootTable().SquirrelFunc("websocket_close", sqwebsocket_close, -2, ".ss");
 	

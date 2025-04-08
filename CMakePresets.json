@@ -14,7 +14,9 @@
 			"cacheVariables": {
 				"CMAKE_C_COMPILER": "cl.exe",
 				"CMAKE_CXX_COMPILER": "cl.exe",
-				"USE_ZLIB": false
+				"USE_ZLIB": false,
+				"USE_TLS": true,
+				"USE_OPEN_SSL": true
 			}
 		},
 		{
@@ -29,7 +31,9 @@
 			},
 			"cacheVariables": {
 				"CMAKE_CXX_FLAGS": "-static-libgcc -static-libstdc++",
-				"USE_ZLIB": false
+				"USE_ZLIB": false,
+				"USE_TLS": true,
+				"USE_OPEN_SSL": true
 			}
 		},
 		{
