@@ -33,11 +33,15 @@ websocket_close(string: url, string: reason)    // Disconnect client with given 
 
 ## Config
 
-**port**: port which will be used for websocket server.
-
-**sendBinary**: if you want to convert all of your messages to binary before sending.
-
-**whitelist**: list of allowed to connect IPs.
+* **port**: port which will be used for websocket server.
+* **sendBinary**: if you want to convert all of your messages to binary before sending.
+* **whitelist**: list of allowed to connect IPs.
+* **tls**: settings for connection with TLS.
+    * **enabled**: enabling TLS connection.
+    * **certFile**: path to certificate file (required if enabled: true)
+    * **keyFile**: path to private key file (required if enabled: true)
+    * **caFile**: specifying caFile implies that: 1. You require clients to present a certificate; 2. It must be signed by one of the trusted roots in the file
+    * **disableHostnameValidation**: by default, a destination's hostname is always validated against the certificate that it presents. To accept certificates with any hostname, set this to **true**.
 
 ## Usage example
 
