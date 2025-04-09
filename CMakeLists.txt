@@ -9,7 +9,11 @@ set(G2OWS_MODULE G2OWS)
 add_library(${G2OWS_MODULE} SHARED)
 
 # Install vcpkg
-set(VCPKG_ROOT "${CMAKE_SOURCE_DIR}/vcpkg" CACHE PATH "Path to vcpkg")
+if(DEFINED ENV{VCPKG_ROOT})
+    set(VCPKG_ROOT $ENV{VCPKG_ROOT})
+else()
+    set(VCPKG_ROOT "${CMAKE_SOURCE_DIR}/vcpkg" CACHE PATH "Path to vcpkg")
+endif()
 if(NOT EXISTS "${VCPKG_ROOT}/.vcpkg-root")
     message(STATUS "Installing vcpkg...")
     execute_process(
