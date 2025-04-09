@@ -1,5 +1,6 @@
 add_subdirectory(sqapi)
-add_subdirectory(ixwebsocket)
+
+include(ixwebsocket.cmake)
 
 add_library(json INTERFACE)
 target_include_directories(json INTERFACE 
