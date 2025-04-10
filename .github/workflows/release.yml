@@ -46,6 +46,30 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: ${{ matrix.arch }}
+          
+      - name: Clone vcpkg
+        uses: actions/checkout@v4
+        with:
+          repository: microsoft/vcpkg
+          path: vcpkg
+
+      - name: Bootstrap vcpkg
+        shell: cmd
+        run: |
+          cd vcpkg
+          .\bootstrap-vcpkg.bat -disableMetrics
+
+      - name: Set environment variables
+        shell: bash
+        run: |
+          echo "VCPKG_ROOT=$GITHUB_WORKSPACE/vcpkg" >> $GITHUB_ENV
+          echo "$GITHUB_WORKSPACE/vcpkg" >> $GITHUB_PATH
+          
+      - name: Verify installation
+        shell: cmd
+        run: |
+          vcpkg --version
+          echo VCPKG_ROOT=%VCPKG_ROOT%
 
       - name: Configure
         run: cmake . --preset Windows-${{ matrix.arch }}-Release
@@ -55,9 +79,6 @@ jobs:
 
       - name: Copy module
         run: copy out\\build\\Windows-${{ matrix.arch }}-Release\\${{ env.PROJECT_NAME }}.${{ matrix.arch }}.dll .
-        
-      - name: Archive module
-        run: Compress-Archive -Path "g2ows.json", "${{ env.PROJECT_NAME }}.${{ matrix.arch }}.dll" -Destination ${{ env.PROJECT_NAME }}.${{ matrix.arch }}.zip
       
       - name: Upload module
         uses: actions/upload-release-asset@v1
@@ -65,9 +86,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-new-release.outputs.assets_url }}
-          asset_path: ./${{ env.PROJECT_NAME }}.${{ matrix.arch }}.zip
-          asset_name: Windows-${{ env.PROJECT_NAME }}.${{ matrix.arch }}.zip
-          asset_content_type: application/zip
+          asset_path: ./${{ env.PROJECT_NAME }}.${{ matrix.arch }}.dll
+          asset_name: ${{ env.PROJECT_NAME }}.${{ matrix.arch }}.dll
+          asset_content_type: application/x-msdownload
 
   build-linux:
     name: Build Linux (${{ matrix.arch }})
@@ -82,6 +103,27 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          
+      - name: Clone vcpkg
+        uses: actions/checkout@v4
+        with:
+          repository: microsoft/vcpkg
+          path: vcpkg
+
+      - name: Bootstrap vcpkg
+        run: |
+          cd vcpkg
+          ./bootstrap-vcpkg.sh -disableMetrics
+
+      - name: Set environment variables
+        run: |
+          echo "VCPKG_ROOT=$GITHUB_WORKSPACE/vcpkg" >> $GITHUB_ENV
+          echo "$GITHUB_WORKSPACE/vcpkg" >> $GITHUB_PATH
+
+      - name: Verify installation
+        run: |
+          vcpkg --version
+          echo "VCPKG_ROOT=$VCPKG_ROOT"
 
       - name: Configure
         run: cmake . --preset Linux-${{ matrix.arch }}-Release
@@ -92,17 +134,12 @@ jobs:
       - name: Copy module
         run: cp out/build/Linux-${{ matrix.arch }}-Release/${{ env.PROJECT_NAME }}.${{ matrix.arch }}.so ./
       
-      - name: Archive module
-        uses: montudor/action-zip@v1
-        with:
-          args: zip -r ${{ env.PROJECT_NAME }}.${{ matrix.arch }}.zip g2ows.json ${{ env.PROJECT_NAME }}.${{ matrix.arch }}.so
-      
       - name: Upload module
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-new-release.outputs.assets_url }}
-          asset_path: ./${{ env.PROJECT_NAME }}.${{ matrix.arch }}.zip
-          asset_name: Linux-${{ env.PROJECT_NAME }}.${{ matrix.arch }}.zip
-          asset_content_type: application/zip
+          asset_path: ./${{ env.PROJECT_NAME }}.${{ matrix.arch }}.so
+          asset_name: ${{ env.PROJECT_NAME }}.${{ matrix.arch }}.so
+          asset_content_type: application/x-sharedlib

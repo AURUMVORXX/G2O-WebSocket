@@ -6,9 +6,8 @@ This module implements websocket server as the G2O server-side module. This way 
 
 ## Installation
 
-1. Download **ZIP** archive and unpack it to your server root folder
-2. Configure ``g2ows.json`` and add your host to whitelist
-3. Connect ``G2OWS.dll`` as server-side module:
+1. Download module and place it to your server folder (root folder, i.e.)
+3. Connect ``G2OWS.dll`` as server-side module or client-side module:
 ```xml
 <module src="G2OWS.dll" type="server" />
 ```
@@ -17,60 +16,121 @@ This module implements websocket server as the G2O server-side module. This way 
 
 **New Events:**
 ```cpp
-onWebsocketConnect(string: url) // Triggers on new connection
-onWebsocketMessage(string: url, string: message) // Triggers on new message
-onWebsocketClose(string: url)   // Triggers on disconnect
+onWebsocketConnect(object: socket, string: url) // Triggers on new connection
+onWebsocketMessage(object: socket, string: url, string: message) // Triggers on new message
+onWebsocketClose(object: socket, string: url)   // Triggers on disconnects
 ```
 
-**New Functions:**
+**WebsocketServer**
 ```cpp
-websocket_send(string: url, std: message)   // Send a message to client with given url
-websocket_sendBinary(string: url, std: message)   // Send a message to client with given url as binary format
-websocket_sendtoall(string: message)    // Send a message to all clients
-websocket_close(string: url, string: reason)    // Disconnect client with given url
+class WebsocketServer
+{
+    int port;                               // Port which server will be running on
+    bool silent;                            // Disable information in the console (new connection, disconnect, etc.)
+    (read-only) bool running;               // Current state of the server
+    (read-only) array whitelist             // Array of whitelisted hosts
+    
+    bool useTls;
+    bool disableHostnameValidation;
+    string certFile;                        // Path to certificate file
+    string keyFile;                         // Path to key file
+    string caFile;                          // Path to CA file
+    
+    void start();                           // Starts server with given settings
+    void stop();                            // Stops server
+    void send(string host, string message); // Send message to given host
+    void sendBinary(string host, string message); // Send binary message to given host
+    void sendToAll(string message);         // Send message to all connected clients
+    void sendBinaryToAll(string message);
+    void disconnect(string host, string reason); // Disconnect client with given host
+    void setWhitelist(array hosts)              // Overwrite whitelist with given array
+    void addWhitelist(string host)              // Add host to existing whitelist
+}
+```
+**WebsocketClient**
+```cpp
+class WebsocketClient
+{
+    (read-only) string url;                 // Client url which it will be connect
+    bool silent;                            // Disable information in the console (new connection, disconnect, etc.)
+    (read-only) bool running;               // Current state of the client
+    
+    bool useTls;
+    bool disableHostnameValidation;
+    string certFile;                        // Path to certificate file
+    string keyFile;                         // Path to key file
+    string caFile;                          // Path to CA file
+    
+    void start();                           // Starts client with given settings
+    void stop();                            // Stops client
+    void send(string message); // Send message to given host
+    void sendBinary(string message); // Send binary message to given host
+}
 ```
 
 **URL** is a string with following format: ``ws://ip:port``. It is a way to identify clients from each other.
-
-## Config
-
-* **port**: port which will be used for websocket server.
-* **sendBinary**: if you want to convert all of your messages to binary before sending.
-* **whitelist**: list of allowed to connect IPs.
-* **tls**: settings for connection with TLS.
-    * **enabled**: enabling TLS connection.
-    * **certFile**: path to certificate file (required if enabled: true)
-    * **keyFile**: path to private key file (required if enabled: true)
-    * **caFile**: specifying caFile implies that: 1. You require clients to present a certificate; 2. It must be signed by one of the trusted roots in the file
-    * **disableHostnameValidation**: by default, a destination's hostname is always validated against the certificate that it presents. To accept certificates with any hostname, set this to **true**.
 
 ## Usage example
 
 **Squirrel (G2O server side)**
 ```cpp
-addEventHandler("onWebsocketConnect", function(client)
+local server = -1;
+local client = -1;
+
+addEventHandler("onInit", function()
 {
-    websocket_send(client, "Hello!");
+    server = WebsocketServer();
+    server.port = 8080;
+    server.setWhitelist(["127.0.0.1", "localhost"]);
+    server.start();
+    
+    print("Current whitelist:");
+    foreach (val in server.whitelist)
+      print(val);
+
+    client = WebsocketClient();
+    client.setUrl("ws://localhost:8080");
+    client.start();
 });
 
-addEventHandler("onTime", function(day, hour, min)
+addEventHandler("onWebsocketConnect", function(socket, url)
 {
-    websocket_sendtoall("Current time: " + day + " / " + hour + ":" + min);
+    if (socket == server)
+    {
+      server.send(url, "Greetings");
+    }
 });
-```
 
-**Any external app (Python i.e.)**
-```python
-import websockets
-import asyncio
+addEventHandler("onWebsocketMessage", function(socket, url, message)
+{
+   if (socket == client)
+   {
+      print("Got message from server: " + message);
+      client.send("Echo: Greetings");
+   }
 
-async def listen_websocket(uri):
-    async with websockets.connect(uri) as websocket:
-        while True:
-            message = await websocket.recv()
-            print(message)
-            
-if __name__ == "__main__":
-    WS_URI = "ws://localhost:8080"
-    asyncio.run_until_complete(listen_websocket(WS_URI))
+   if (socket == server)
+   {
+      print("Got message from " + url + ": " + message);
+   }
+});
+
+addEventHandler("onWebsocketDisconnect", function(socket, url)
+{
+   if (socket == server)
+   {
+      print("Client " + url + " has been disconnected");
+   }
+});
+
+// Just simple example how to dynamically update whitelist to connect client-side and server-side
+addEventHandler("onPlayerConnect", function(pid)
+{
+    server.addWhitelist(getPlayerIp(pid));
+});
+addEventHandler("onPlayerDisconnect", function(pid, reason)
+{
+    server.removeWhitelist(getPlayerIp(pid));
+});
+
 ```
