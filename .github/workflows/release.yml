@@ -96,7 +96,7 @@ jobs:
     needs: create-new-release
     strategy:
       matrix:
-        arch: [x64, arm, arm64]
+        arch: [x64]
     container:
       image: registry.gitlab.com/gothicmultiplayerteam/buildimage:ubuntu-20.04-x64
     steps:
