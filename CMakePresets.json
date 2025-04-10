@@ -60,7 +60,9 @@
 				"strategy": "external"
 			},
 			"cacheVariables": {
-				"OUT_FILE_SUFFIX": "arm"
+				"OUT_FILE_SUFFIX": "arm",
+				"CMAKE_C_COMPILER": "arm-linux-gnueabihf-gcc",
+				"CMAKE_CXX_COMPILER": "arm-linux-gnueabihf-g++"
 			}
 		},
 		{
@@ -71,7 +73,9 @@
 				"strategy": "external"
 			},
 			"cacheVariables": {
-				"OUT_FILE_SUFFIX": "arm64"
+				"OUT_FILE_SUFFIX": "arm64",
+				"CMAKE_C_COMPILER": "aarch64-linux-gnu-gcc",
+				"CMAKE_CXX_COMPILER": "aarch64-linux-gnu-g++"
 			}
 		},
 		{
@@ -103,10 +107,10 @@
 		{ "name": "Windows-x64-Release", "inherits": ["vcpkg", "windows", "x64", "release"], "cacheVariables": { "VCPKG_TARGET_TRIPLET": "x64-windows-static" } },
 		{ "name": "Linux-x64-Debug", "inherits": ["vcpkg", "linux", "x64", "debug"], "cacheVariables": { "VCPKG_TARGET_TRIPLET": "x64-linux-static" } },
 		{ "name": "Linux-x64-Release", "inherits": ["vcpkg", "linux", "x64", "release"], "cacheVariables": { "VCPKG_TARGET_TRIPLET": "x64-linux-static" } },
-		{ "name": "Linux-arm-Debug", "inherits": ["vcpkg", "linux", "arm", "debug"], "cacheVariables": { "VCPKG_TARGET_TRIPLET": "arm-linux-static" } },
-		{ "name": "Linux-arm-Release", "inherits": ["vcpkg", "linux", "arm", "release"], "cacheVariables": { "VCPKG_TARGET_TRIPLET": "arm-linux-static" } },
-		{ "name": "Linux-arm64-Debug", "inherits": ["vcpkg", "linux", "arm64", "debug"], "cacheVariables": { "VCPKG_TARGET_TRIPLET": "arm64-linux-static" } },
-		{ "name": "Linux-arm64-Release", "inherits": ["vcpkg", "linux", "arm64", "release"], "cacheVariables": { "VCPKG_TARGET_TRIPLET": "arm64-linux-static" } }
+		{ "name": "Linux-arm-Debug", "inherits": ["vcpkg", "linux", "arm", "debug"], "cacheVariables": { "VCPKG_TARGET_TRIPLET": "arm-linux-static", "VCPKG_HOST_TRIPLET": "arm-linux-static" } },
+		{ "name": "Linux-arm-Release", "inherits": ["vcpkg", "linux", "arm", "release"], "cacheVariables": { "VCPKG_TARGET_TRIPLET": "arm-linux-static", "VCPKG_HOST_TRIPLET": "arm-linux-static" } },
+		{ "name": "Linux-arm64-Debug", "inherits": ["vcpkg", "linux", "arm64", "debug"], "cacheVariables": { "VCPKG_TARGET_TRIPLET": "arm64-linux-static", "VCPKG_HOST_TRIPLET": "arm64-linux-static" } },
+		{ "name": "Linux-arm64-Release", "inherits": ["vcpkg", "linux", "arm64", "release"], "cacheVariables": { "VCPKG_TARGET_TRIPLET": "arm64-linux-static", "VCPKG_HOST_TRIPLET": "arm64-linux-static" } }
 	],
 	"buildPresets": [
 		{ "name": "Windows-x86-Debug", "configurePreset": "Windows-x86-Debug" },
