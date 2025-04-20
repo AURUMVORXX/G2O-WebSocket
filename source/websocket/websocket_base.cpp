@@ -6,8 +6,11 @@
 
 void WebsocketBase::_insertEvent(std::function<void()> function)
 {
-    std::lock_guard<std::mutex> lock(_eventMutex);
-    _eventQueue.push(function);
+    {
+        std::lock_guard<std::mutex> lock(_eventMutex);
+        _eventQueue.push(function);
+    }
+    _eventCondition.notify_one();
 }
 
 void WebsocketBase::_startEventThread() {
@@ -15,7 +18,10 @@ void WebsocketBase::_startEventThread() {
     _eventThread = std::thread([this]() {
         while (_eventThreadRunning) {
             _processEvents();
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            std::unique_lock<std::mutex> lock(_eventMutex);
+            _eventCondition.wait(lock, [this]() {
+                return !_eventQueue.empty() || !_eventThreadRunning;
+            });
         }
         _processEvents();
     });

@@ -8,6 +8,7 @@ private:
     std::thread _eventThread;
     std::atomic<bool> _eventThreadRunning{false};
     std::queue<std::function<void()>> _eventQueue;
+    std::condition_variable _eventCondition;
     
 protected:
     
