@@ -2,6 +2,7 @@
 #include <sqapi.h>
 #include <vector>
 #include <queue>
+#include <format>
 
 #include <websocket_util.h>
 #include "websocket_base.h"

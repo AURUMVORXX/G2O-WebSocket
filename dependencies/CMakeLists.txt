@@ -2,12 +2,8 @@ add_subdirectory(sqapi)
 
 include(ixwebsocket.cmake)
 
-add_library(json INTERFACE)
-target_include_directories(json INTERFACE 
-	"json/include/"
-)
-
 set(OPENSSL_DEFINITIONS "-DOPENSSL_API_COMPAT=30000")
+find_package(OpenSSL REQUIRED)
 
 target_compile_definitions(${G2OWS_MODULE}
 	PRIVATE
@@ -19,8 +15,8 @@ if(WIN32)
 		PRIVATE 
 			sqapi
 			ixwebsocket
-			json
-			${OPENSSL_LIBRARIES}
+			OpenSSL::SSL
+			OpenSSL::Crypto
 			crypt32.lib
 			ws2_32.lib
 	)
@@ -30,6 +26,7 @@ else()
 		sqapi
 		ixwebsocket
 		json
-		${OPENSSL_LIBRARIES}
+		OpenSSL::SSL
+		OpenSSL::Crypto
 	)
 endif()
