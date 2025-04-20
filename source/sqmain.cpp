@@ -26,14 +26,14 @@ extern "C" SQRESULT SQRAT_API sqmodule_load(HSQUIRRELVM vm, HSQAPI api)
 		
 		websocketServer
 		.Var("port", &WebsocketServer::port)
-		.Var("silent", &WebsocketServer::silent)
-		.Prop("running", &WebsocketServer::GetRunning)
+		.Var("silent", static_cast<bool WebsocketBase::*>(&WebsocketServer::silent))
+		.Prop("running", static_cast<bool (WebsocketBase::*)()>(&WebsocketServer::GetRunning))
 		.Prop("whitelist", &WebsocketServer::GetWhitelist)
 		
-		.Var("disableHostnameValidation", &WebsocketServer::disableHostnameValidation)
-		.Var("certFile", &WebsocketServer::certificateFilePath)
-		.Var("keyFile", &WebsocketServer::keyFilePath)
-		.Var("caFile", &WebsocketServer::caFilePath)
+		.Var("disableHostnameValidation", static_cast<bool WebsocketBase::*>(&WebsocketServer::disableHostnameValidation))
+		.Var("certFile", static_cast<std::string WebsocketBase::*>(&WebsocketServer::certificateFilePath))
+		.Var("keyFile", static_cast<std::string WebsocketBase::*>(&WebsocketServer::keyFilePath))
+		.Var("caFile", static_cast<std::string WebsocketBase::*>(&WebsocketServer::caFilePath))
 		
 		.Func("start", &WebsocketServer::Start)
 		.Func("stop", &WebsocketServer::Stop)
@@ -55,19 +55,19 @@ extern "C" SQRESULT SQRAT_API sqmodule_load(HSQUIRRELVM vm, HSQAPI api)
 	Sqrat::Class<WebsocketClient, Sqrat::NoCopy<WebsocketClient>> websocketClient(vm, "WebsocketClient");
 		
 	websocketClient
-	.Var("silent", &WebsocketClient::silent)
-	.Prop("running", &WebsocketClient::GetRunning)
-	.Prop("url", &WebsocketClient::GetUrl)
+	.Var("silent", static_cast<bool WebsocketBase::*>(&WebsocketClient::silent))
+	.Prop("running", static_cast<bool (WebsocketBase::*)()>(&WebsocketClient::GetRunning))
+	.Prop("url", static_cast<std::string (WebsocketBase::*)()>(&WebsocketClient::GetUrl))
 	
-	.Var("disableHostnameValidation", &WebsocketClient::disableHostnameValidation)
-	.Var("certFile", &WebsocketClient::certificateFilePath)
-	.Var("keyFile", &WebsocketClient::keyFilePath)
-	.Var("caFile", &WebsocketClient::caFilePath)
+	.Var("disableHostnameValidation", static_cast<bool WebsocketBase::*>(&WebsocketClient::disableHostnameValidation))
+	.Var("certFile", static_cast<std::string WebsocketBase::*>(&WebsocketClient::certificateFilePath))
+	.Var("keyFile", static_cast<std::string WebsocketBase::*>(&WebsocketClient::keyFilePath))
+	.Var("caFile", static_cast<std::string WebsocketBase::*>(&WebsocketClient::caFilePath))
 	
 	.Func("start", &WebsocketClient::Start)
 	.Func("stop", &WebsocketClient::Stop)
 	.Func("send", &WebsocketClient::Send)
-	.Func("setUrl", &WebsocketClient::SetUrl);
+	.Func("setUrl", static_cast<void (WebsocketBase::*)(std::string)>(&WebsocketClient::SetUrl));
 	
 	Sqrat::RootTable().Bind("WebsocketClient", websocketClient);
 	
