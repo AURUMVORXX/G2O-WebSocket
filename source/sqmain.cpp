@@ -2,7 +2,6 @@
 #include <ixwebsocket/IXWebSocketServer.h>
 #include <vector>
 #include <queue>
-#include <format>
 
 #include "websocket/websocket_base.h"
 #include "websocket/websocket_server.h"

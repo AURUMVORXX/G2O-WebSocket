@@ -2,7 +2,6 @@
 #include <sqapi.h>
 #include <vector>
 #include <queue>
-#include <format>
 
 #include <websocket_util.h>
 #include "websocket_base.h"
@@ -41,7 +40,9 @@ void WebsocketServer::Start()
                 return;
                 
             _server->start();
-            _log(std::format("[WebSocket][Start] Listening on {}", port));
+            std::stringstream ss;
+            ss << "[Websocket][Start] Listening on " << port;
+            _log(ss.str());
         }
     );
     
@@ -68,7 +69,9 @@ void WebsocketServer::Stop()
     delete _server;
     ix::uninitNetSystem();
     
-    _log(std::format("[Websocket][Start] Listening on {} has been stopped", port));
+    std::stringstream ss;
+    ss << "[Websocket][Start] Listening on " << port << " has been stopped";
+    _log(ss.str());
 }
 
 void WebsocketServer::SetWhitelist(Sqrat::Array& whitelist)
@@ -238,12 +241,17 @@ void WebsocketServer::_MessageHandler(std::shared_ptr<ix::ConnectionState> state
     {
         if (!_IsHostWhitelisted(state->getRemoteIp()))
         {
-            _log(std::format("[Websocket][Handler] Host {} tried to connect, but it's not whitelisted", state->getRemoteIp()));
+            std::stringstream ss;
+            ss << "[Websocket][Handler] Host " << state->getRemoteIp() << " tried to connect, but it's not whitelisted";
+            _log(ss.str());
             ws.close(ix::WebSocketCloseConstants::kNormalClosureCode, "Host is not in the whitelist.");
             return;
         }
         
-        std::string url = std::format("ws://{}:{}", state->getRemoteIp(), state->getRemotePort());
+        std::stringstream ss_url;
+        ss_url << "ws://" << state->getRemoteIp() << ":" << state->getRemotePort();
+        
+        std::string url = ss_url.str();
         ws.setUrl(url);
         
         WSClient newClient;
@@ -257,7 +265,10 @@ void WebsocketServer::_MessageHandler(std::shared_ptr<ix::ConnectionState> state
         Subscribe(url, url);
         Subscribe(url, "ALL");
         
-        _log(std::format("[Websocket][Handler] {} connected to the websocket server", state->getRemoteIp()));
+        std::stringstream ss;
+        ss << "[Websocket][Handler] " << state->getRemoteIp() << " connected to the websocket server";
+        _log(ss.str());
+
         _insertEvent([this, url](){
             Sqrat::Function callEvent(Sqrat::RootTable(), "callEvent");
             callEvent("onWebsocketConnect", this, url);
@@ -274,7 +285,10 @@ void WebsocketServer::_MessageHandler(std::shared_ptr<ix::ConnectionState> state
         if (client != _connectedClients.end())
             _connectedClients.erase(client);
         
-        _log(std::format("[Websocket][Handler] {} disconnected from the websocket server. Reason: {}", url, message));
+        std::stringstream ss;
+        ss << "[Websocket][Handler] " << url << " disconnected from the websocket server. Reason: " << message;
+        _log(ss.str());
+        
         _insertEvent([this, url, message](){
             Sqrat::Function callEvent(Sqrat::RootTable(), "callEvent");
             callEvent("onWebsocketClose", this, url, message);

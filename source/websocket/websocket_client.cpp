@@ -2,7 +2,6 @@
 #include <sqapi.h>
 #include <vector>
 #include <queue>
-#include <format>
 
 #include <websocket_util.h>
 #include "websocket_base.h"
@@ -32,7 +31,9 @@ void WebsocketClient::Start()
     _client->start();
     WebsocketBase::Start();
     
-    _log(std::format("[WebSocket][Start] Client started connection to {}", _url));
+    std::stringstream ss;
+    ss << "[WebSocket][Start] Client started connection to "<< _url;
+    _log(ss.str());
 }
 
 WebsocketClient::~WebsocketClient()
@@ -51,7 +52,9 @@ void WebsocketClient::Stop()
     
     delete _client;
     
-    _log(std::format("[Websocket][Stop] Client at {} has been stopped", _url));
+    std::stringstream ss;
+    ss << "[WebSocket][Start] Client at " << _url << " has been stopped";
+    _log(ss.str());
 }
 
 void WebsocketClient::Send(std::string message)
@@ -78,7 +81,10 @@ void WebsocketClient::_MessageHandler(const ix::WebSocketMessagePtr& msg)
         
     if (msg->type == ix::WebSocketMessageType::Open)
     {
-        _log(std::format("[WebSocket][Start] Client connected to {}", _url));
+        std::stringstream ss;
+        ss << "[WebSocket][Start] Client connected to " << _url;
+        _log(ss.str());
+
         _insertEvent([this]() {
             Sqrat::Function callEvent(Sqrat::RootTable(), "callEvent");
             callEvent("onWebsocketConnect", this, _url);
@@ -88,7 +94,11 @@ void WebsocketClient::_MessageHandler(const ix::WebSocketMessagePtr& msg)
     else if (msg->type == ix::WebSocketMessageType::Close)
     {
         std::string message = msg->closeInfo.reason;
-        _log(std::format("[WebSocket][Start] Client disconnected from {}. Reason: {}", _url, message));
+        
+        std::stringstream ss;
+        ss << "[WebSocket][Start] Client disconnected from " << _url << ". Reason: " << message;
+        _log(ss.str());
+        
         _insertEvent([this, message]() {
             Sqrat::Function callEvent(Sqrat::RootTable(), "callEvent");
             callEvent("onWebsocketClose", this, _url, message);
