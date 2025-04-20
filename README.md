@@ -18,33 +18,34 @@ This module implements websocket server as the G2O server-side module. This way 
 ```cpp
 onWebsocketConnect(object: socket, string: url) // Triggers on new connection
 onWebsocketMessage(object: socket, string: url, string: message) // Triggers on new message
-onWebsocketClose(object: socket, string: url)   // Triggers on disconnects
+onWebsocketClose(object: socket, string: url, string: message)   // Triggers on disconnects
 ```
 
 **WebsocketServer**
 ```cpp
 class WebsocketServer
 {
-    int port;                               // Port which server will be running on
-    bool silent;                            // Disable information in the console (new connection, disconnect, etc.)
-    (read-only) bool running;               // Current state of the server
-    (read-only) array whitelist             // Array of whitelisted hosts
+    int port;                                   // Port which server will be running on
+    bool silent;                                // Disable information in the console (new connection, disconnect, etc.)
+    (read-only) bool running;                   // Current state of the server
+    (read-only) array whitelist                 // Array of whitelisted hosts
     
-    bool useTls;
     bool disableHostnameValidation;
-    string certFile;                        // Path to certificate file
-    string keyFile;                         // Path to key file
-    string caFile;                          // Path to CA file
+    string certFile;                            // Path to certificate file
+    string keyFile;                             // Path to key file
+    string caFile;                              // Path to CA file
     
-    void start();                           // Starts server with given settings
-    void stop();                            // Stops server
-    void send(string host, string message); // Send message to given host
-    void sendBinary(string host, string message); // Send binary message to given host
-    void sendToAll(string message);         // Send message to all connected clients
-    void sendBinaryToAll(string message);
-    void disconnect(string host, string reason); // Disconnect client with given host
-    void setWhitelist(array hosts)              // Overwrite whitelist with given array
-    void addWhitelist(string host)              // Add host to existing whitelist
+    void start();                               // Starts server with given settings
+    void stop();                                // Stops server
+    void send(string topic, string message);    // Send message to given host
+    void close(string url, string reason);      // Disconnect client with given host
+    void setWhitelist(array IPv4)               // Overwrite whitelist with given array
+    void addWhitelist(string IPv4)              // Add host to existing whitelist
+    void removeWhitelist(string IPv4)           // Remove host from whitelist
+    void subscribe(string url, string topic)    // Subscribe client to a topic
+    void unsubscribe(string url, string topic)  // Unsubscribe cleant from a certain topic
+    void unsubscribe(string url)                // Unsubscribe client from all topics
+    array getTopics(string url)                 // Get list of all subscribed by client topics
 }
 ```
 **WebsocketClient**
@@ -55,7 +56,6 @@ class WebsocketClient
     bool silent;                            // Disable information in the console (new connection, disconnect, etc.)
     (read-only) bool running;               // Current state of the client
     
-    bool useTls;
     bool disableHostnameValidation;
     string certFile;                        // Path to certificate file
     string keyFile;                         // Path to key file
@@ -63,8 +63,7 @@ class WebsocketClient
     
     void start();                           // Starts client with given settings
     void stop();                            // Stops client
-    void send(string message); // Send message to given host
-    void sendBinary(string message); // Send binary message to given host
+    void send(string message);              // Send message to given host
 }
 ```
 
@@ -98,6 +97,7 @@ addEventHandler("onWebsocketConnect", function(socket, url)
     if (socket == server)
     {
       server.send(url, "Greetings");
+      server.subscribe(url, "TIME");
     }
 });
 
@@ -121,6 +121,12 @@ addEventHandler("onWebsocketDisconnect", function(socket, url)
    {
       print("Client " + url + " has been disconnected");
    }
+});
+
+addEventHandler("onTime", function(day, hour, min)
+{
+    if (server != -1 && server.running)
+        server.send("TIME", "Current time: " + hour + ":" + min);
 });
 
 // Just simple example how to dynamically update whitelist to connect client-side and server-side

@@ -1,10 +1,11 @@
 #include <sqapi.h>
 #include <ixwebsocket/IXWebSocketServer.h>
 #include <vector>
-#include <iostream>
+#include <queue>
 
-#include "server/websocket_server.h"
-#include "client/websocket_client.h"
+#include "websocket/websocket_base.h"
+#include "websocket/websocket_server.h"
+#include "websocket/websocket_client.h"
 
 extern "C" SQRESULT SQRAT_API sqmodule_load(HSQUIRRELVM vm, HSQAPI api)
 {
@@ -13,7 +14,7 @@ extern "C" SQRESULT SQRAT_API sqmodule_load(HSQUIRRELVM vm, HSQAPI api)
 	Sqrat::Function addEvent(Sqrat::RootTable(), "addEvent");
 	addEvent("onWebsocketMessage");
     addEvent("onWebsocketConnect");
-    addEvent("onWebsocketDisconnect");
+    addEvent("onWebsocketClose");
 	
 	Sqrat::Object serverSide = Sqrat::ConstTable(vm).GetSlot("SERVER_SIDE");
 	
@@ -29,7 +30,6 @@ extern "C" SQRESULT SQRAT_API sqmodule_load(HSQUIRRELVM vm, HSQAPI api)
 		.Prop("running", &WebsocketServer::GetRunning)
 		.Prop("whitelist", &WebsocketServer::GetWhitelist)
 		
-		.Var("useTls", &WebsocketServer::useTls)
 		.Var("disableHostnameValidation", &WebsocketServer::disableHostnameValidation)
 		.Var("certFile", &WebsocketServer::certificateFilePath)
 		.Var("keyFile", &WebsocketServer::keyFilePath)
@@ -38,10 +38,11 @@ extern "C" SQRESULT SQRAT_API sqmodule_load(HSQUIRRELVM vm, HSQAPI api)
 		.Func("start", &WebsocketServer::Start)
 		.Func("stop", &WebsocketServer::Stop)
 		.Func("send", &WebsocketServer::Send)
-		.Func("sendBinary", &WebsocketServer::SendBinary)
-		.Func("sendToAll", &WebsocketServer::SendToAll)
-		.Func("sendBinaryToAll", &WebsocketServer::SendBinaryToAll)
-		.Func("disconnect", &WebsocketServer::Disconnect)
+		.Func("close", &WebsocketServer::Close)
+		.Func("subscribe", &WebsocketServer::Subscribe)
+		.Overload("unsubscribe", static_cast<void (WebsocketServer::*)(std::string, std::string)>(&WebsocketServer::Unsubscribe))
+		.Overload("unsubscribe", static_cast<void (WebsocketServer::*)(std::string)>(&WebsocketServer::Unsubscribe))
+		.Func("getTopics", &WebsocketServer::GetTopics)
 		.Func("setWhitelist", &WebsocketServer::SetWhitelist)
 		.Func("addWhitelist", &WebsocketServer::AddWhitelist)
 		.Func("removeWhitelist", &WebsocketServer::RemoveWhitelist);
@@ -58,7 +59,6 @@ extern "C" SQRESULT SQRAT_API sqmodule_load(HSQUIRRELVM vm, HSQAPI api)
 	.Prop("running", &WebsocketClient::GetRunning)
 	.Prop("url", &WebsocketClient::GetUrl)
 	
-	.Var("useTls", &WebsocketClient::useTls)
 	.Var("disableHostnameValidation", &WebsocketClient::disableHostnameValidation)
 	.Var("certFile", &WebsocketClient::certificateFilePath)
 	.Var("keyFile", &WebsocketClient::keyFilePath)
@@ -67,7 +67,6 @@ extern "C" SQRESULT SQRAT_API sqmodule_load(HSQUIRRELVM vm, HSQAPI api)
 	.Func("start", &WebsocketClient::Start)
 	.Func("stop", &WebsocketClient::Stop)
 	.Func("send", &WebsocketClient::Send)
-	.Func("sendBinary", &WebsocketClient::SendBinary)
 	.Func("setUrl", &WebsocketClient::SetUrl);
 	
 	Sqrat::RootTable().Bind("WebsocketClient", websocketClient);
