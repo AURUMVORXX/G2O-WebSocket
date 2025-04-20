@@ -29,6 +29,7 @@ void WebsocketBase::_startEventThread() {
 
 void WebsocketBase::_stopEventThread() {
     _eventThreadRunning = false;
+    _eventCondition.notify_one();
     if (_eventThread.joinable()) {
         _eventThread.join();
     }
@@ -65,5 +66,5 @@ void WebsocketBase::Start()
 void WebsocketBase::Stop()
 {
     _running = false;
-    _startEventThread();
+    _stopEventThread();
 }
