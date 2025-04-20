@@ -61,34 +61,3 @@ void WebsocketBase::Stop()
     _running = false;
     _startEventThread();
 }
-
-void WebsocketBase::SetUrl(std::string url)
-{
-    if (_running)
-    {
-        std::cout << "[WebSocket][SetUrl] Already running" << std::endl;
-        return;
-    }
-    
-    _url = url;
-}
-
-ix::SocketTLSOptions WebsocketBase::_getTLSOptions()
-{
-    ix::SocketTLSOptions tlsOptions;
-    tlsOptions.tls  = !certificateFilePath.empty();
-    tlsOptions.disable_hostname_validation = disableHostnameValidation;
-    tlsOptions.certFile = certificateFilePath;
-    tlsOptions.keyFile = keyFilePath;
-    tlsOptions.caFile = caFilePath;
-    
-    return tlsOptions;
-}
-
-void WebsocketBase::_log(std::string message)
-{
-    if (silent)
-        return;
-        
-    std::cout << message << std::endl;
-}

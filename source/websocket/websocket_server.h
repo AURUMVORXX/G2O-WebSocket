@@ -31,6 +31,8 @@ private:
     std::vector<WSClient>::iterator _findClient(std::string);
     
     void _MessageHandler(std::shared_ptr<ix::ConnectionState>, ix::WebSocket&, const ix::WebSocketMessagePtr&);
+    ix::SocketTLSOptions _getTLSOptions();
+    void _log(std::string);
     
 public:
     
@@ -53,7 +55,13 @@ public:
     void AddWhitelist(std::string);
     void RemoveWhitelist(std::string);
     
-public:
+    bool GetRunning() { return _running; }
     
+    bool silent{false};
     int port{8080};
+    
+    bool disableHostnameValidation{false};
+    std::string certificateFilePath{""};
+    std::string keyFilePath{""};
+    std::string caFilePath{"NONE"};
 };

@@ -2,6 +2,7 @@
 #include <sqapi.h>
 #include <vector>
 #include <queue>
+#include <iostream>
 
 #include <websocket_util.h>
 #include "websocket_base.h"
@@ -230,6 +231,26 @@ void WebsocketServer::Close(std::string url, std::string reason)
         return;
         
     client->socket->close(ix::WebSocketCloseConstants::kNormalClosureCode, reason);
+}
+
+ix::SocketTLSOptions WebsocketServer::_getTLSOptions()
+{
+    ix::SocketTLSOptions tlsOptions;
+    tlsOptions.tls  = !certificateFilePath.empty();
+    tlsOptions.disable_hostname_validation = disableHostnameValidation;
+    tlsOptions.certFile = certificateFilePath;
+    tlsOptions.keyFile = keyFilePath;
+    tlsOptions.caFile = caFilePath;
+    
+    return tlsOptions;
+}
+
+void WebsocketServer::_log(std::string message)
+{
+    if (silent)
+        return;
+        
+    std::cout << message << std::endl;
 }
 
 void WebsocketServer::_MessageHandler(std::shared_ptr<ix::ConnectionState> state, ix::WebSocket& ws, const ix::WebSocketMessagePtr& msg)

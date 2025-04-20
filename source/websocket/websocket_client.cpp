@@ -2,6 +2,7 @@
 #include <sqapi.h>
 #include <vector>
 #include <queue>
+#include <iostream>
 
 #include <websocket_util.h>
 #include "websocket_base.h"
@@ -55,6 +56,37 @@ void WebsocketClient::Stop()
     std::stringstream ss;
     ss << "[WebSocket][Start] Client at " << _url << " has been stopped";
     _log(ss.str());
+}
+
+void WebsocketClient::SetUrl(std::string url)
+{
+    if (_running)
+    {
+        _log("[WebSocket][SetUrl] Already running");
+        return;
+    }
+    
+    _url = url;
+}
+
+ix::SocketTLSOptions WebsocketClient::_getTLSOptions()
+{
+    ix::SocketTLSOptions tlsOptions;
+    tlsOptions.tls  = !certificateFilePath.empty();
+    tlsOptions.disable_hostname_validation = disableHostnameValidation;
+    tlsOptions.certFile = certificateFilePath;
+    tlsOptions.keyFile = keyFilePath;
+    tlsOptions.caFile = caFilePath;
+    
+    return tlsOptions;
+}
+
+void WebsocketClient::_log(std::string message)
+{
+    if (silent)
+        return;
+        
+    std::cout << message << std::endl;
 }
 
 void WebsocketClient::Send(std::string message)
