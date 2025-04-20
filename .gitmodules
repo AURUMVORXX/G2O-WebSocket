@@ -4,6 +4,3 @@
 [submodule "dependencies/ixwebsocket"]
 	path = dependencies/ixwebsocket
 	url = https://github.com/machinezone/IXWebSocket.git
-[submodule "dependencies/json"]
-	path = dependencies/json
-	url = https://github.com/nlohmann/json.git
