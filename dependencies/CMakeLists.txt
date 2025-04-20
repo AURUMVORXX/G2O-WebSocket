@@ -25,7 +25,6 @@ else()
 	PRIVATE 
 		sqapi
 		ixwebsocket
-		json
 		OpenSSL::SSL
 		OpenSSL::Crypto
 	)
