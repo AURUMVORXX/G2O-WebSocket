@@ -4,27 +4,31 @@ class WebsocketBase
 {
 private:
     
+    static std::vector<WebsocketBase*> _objectList;
+    
     std::mutex _eventMutex;
-    std::thread _eventThread;
-    std::atomic<bool> _eventThreadRunning{false};
     std::queue<std::function<void()>> _eventQueue;
-    std::condition_variable _eventCondition;
+    
+    static void _addEventHandler(const char*, SQFUNCTION, unsigned int = 9999);
+    void _processEvents();
+    
+    static SQInteger _sqCallback(HSQUIRRELVM vm);
     
 protected:
     
     std::mutex _operationMutex;
-    
     bool _running{false};
     
     void _insertEvent(std::function<void()>);
-    void _startEventThread();
-    void _stopEventThread();
-    void _processEvents();
     
     void _log(std::string);
     
 public:
     
+    WebsocketBase();
+    ~WebsocketBase();
+    
     void Start();
     void Stop();
+    static void Init();
 };

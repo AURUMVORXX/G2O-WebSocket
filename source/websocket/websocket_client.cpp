@@ -8,8 +8,30 @@
 #include "websocket_base.h"
 #include "websocket_client.h"
 
-void WebsocketClient::Start()
+WebsocketClient::WebsocketClient()
 {
+    _client = new ix::WebSocket();
+    _client->setPingInterval(30);
+    _client->setOnMessageCallback(
+        [this](const ix::WebSocketMessagePtr& msg)
+        {
+            ix::WebSocketMessageType msgType = msg->type;
+            std::string message;
+            if (msgType == ix::WebSocketMessageType::Close)
+                message = msg->closeInfo.reason;
+            else
+                message = msg->str;
+            
+            _insertEvent([this, msgType, message]()
+            {
+                _MessageHandler(msgType, message);
+            });
+        }
+    );
+}
+
+void WebsocketClient::Start()
+{   
     std::lock_guard<std::mutex> lock(_operationMutex);
     if (_running)
     {
@@ -17,20 +39,11 @@ void WebsocketClient::Start()
         return;
     }
     
-    _client = new ix::WebSocket();
     _client->setUrl(_url);
-    _client->setPingInterval(30);
     _client->setTLSOptions(_getTLSOptions());
     
-    _client->setOnMessageCallback(
-        [this](const ix::WebSocketMessagePtr& msg)
-        {
-            this->_MessageHandler(msg);
-        }
-    );
-    
-    _client->start();
     WebsocketBase::Start();
+    _client->start();
     
     std::stringstream ss;
     ss << "[WebSocket][Start] Client started connection to "<< _url;
@@ -40,6 +53,7 @@ void WebsocketClient::Start()
 WebsocketClient::~WebsocketClient()
 {
     Stop();
+    delete _client;
 }
 
 void WebsocketClient::Stop()
@@ -50,8 +64,6 @@ void WebsocketClient::Stop()
     
     _client->stop(1000, "Normal closure");
     WebsocketBase::Stop();
-    
-    delete _client;
     
     std::stringstream ss;
     ss << "[WebSocket][Start] Client at " << _url << " has been stopped";
@@ -106,43 +118,34 @@ void WebsocketClient::Send(std::string message)
     _client->send(message);
 }
 
-void WebsocketClient::_MessageHandler(const ix::WebSocketMessagePtr& msg)
+void WebsocketClient::_MessageHandler(ix::WebSocketMessageType msgType, std::string message)
 {
     if (!_running)
         return;
         
-    if (msg->type == ix::WebSocketMessageType::Open)
+    if (msgType == ix::WebSocketMessageType::Open)
     {
         std::stringstream ss;
         ss << "[WebSocket][Start] Client connected to " << _url;
         _log(ss.str());
 
-        _insertEvent([this]() {
-            Sqrat::Function callEvent(Sqrat::RootTable(), "callEvent");
-            callEvent("onWebsocketConnect", this, _url);
-        });
+        if (!onOpenHandler.IsNull())
+            onOpenHandler(_url);
     }
     
-    else if (msg->type == ix::WebSocketMessageType::Close)
+    else if (msgType == ix::WebSocketMessageType::Close)
     {
-        std::string message = msg->closeInfo.reason;
-        
         std::stringstream ss;
         ss << "[WebSocket][Start] Client disconnected from " << _url << ". Reason: " << message;
         _log(ss.str());
         
-        _insertEvent([this, message]() {
-            Sqrat::Function callEvent(Sqrat::RootTable(), "callEvent");
-            callEvent("onWebsocketClose", this, _url, message);
-        });
+        if (!onCloseHandler.IsNull())
+            onCloseHandler(_url, message);
     }
     
-    else if (msg->type == ix::WebSocketMessageType::Message)
+    if (msgType == ix::WebSocketMessageType::Message)
     {
-        std::string message = msg->str;
-        _insertEvent([this, message]() {
-            Sqrat::Function callEvent(Sqrat::RootTable(), "callEvent");
-            callEvent("onWebsocketMessage", this, _url, message);
-        });
+        if (!onMessageHandler.IsNull())
+            onMessageHandler(_url, message);
     }
 }

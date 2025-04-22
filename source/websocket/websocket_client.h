@@ -7,12 +7,12 @@ private:
     ix::WebSocket* _client;
     std::string _url{""};
     
-    void _MessageHandler(const ix::WebSocketMessagePtr& msg);
+    void _MessageHandler(ix::WebSocketMessageType, std::string);
     ix::SocketTLSOptions _getTLSOptions();
     void _log(std::string);
 public:
     
-    WebsocketClient() {};
+    WebsocketClient();
     ~WebsocketClient();
     
     void Start();
@@ -21,12 +21,15 @@ public:
     
     void SetUrl(std::string);
     std::string GetUrl() { return _url; }
-    
-    bool GetRunning() { return _running; }
+    bool GetRunning() { return _running; };
     
     bool silent{false};
     bool disableHostnameValidation{false};
     std::string certificateFilePath{""};
     std::string keyFilePath{""};
     std::string caFilePath{"NONE"};
+    
+    Sqrat::Function onOpenHandler;
+    Sqrat::Function onCloseHandler;
+    Sqrat::Function onMessageHandler;
 };

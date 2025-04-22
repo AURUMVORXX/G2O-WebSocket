@@ -25,18 +25,20 @@ private:
     std::vector<WSClient> _connectedClients;
     std::unordered_map<std::string, std::vector<WSClient>> _topics;
     
-    bool _IsHostWhitelisted(std::string);
+    bool _validateWhitelisted(ix::WebSocket* ws, std::string);
     
     std::vector<WSClient>::iterator _findClient(ix::WebSocket*);
     std::vector<WSClient>::iterator _findClient(std::string);
+    void _initializeClient(ix::WebSocket*, std::string, int);
+    void _deinitializeClient(ix::WebSocket*);
     
-    void _MessageHandler(std::shared_ptr<ix::ConnectionState>, ix::WebSocket&, const ix::WebSocketMessagePtr&);
+    void _MessageHandler(std::shared_ptr<ix::ConnectionState>, ix::WebSocket*, ix::WebSocketMessageType, std::string);
     ix::SocketTLSOptions _getTLSOptions();
     void _log(std::string);
     
 public:
     
-    WebsocketServer() {};
+    WebsocketServer();
     ~WebsocketServer();
     
     void Start();
@@ -64,4 +66,8 @@ public:
     std::string certificateFilePath{""};
     std::string keyFilePath{""};
     std::string caFilePath{"NONE"};
+    
+    Sqrat::Function onOpenHandler;
+    Sqrat::Function onCloseHandler;
+    Sqrat::Function onMessageHandler;
 };
