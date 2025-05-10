@@ -114,7 +114,15 @@ void WebsocketServer::_MessageHandler(std::shared_ptr<ix::ConnectionState> state
     if (msgType == ix::WebSocketMessageType::Open)
     {
         if (!_validateWhitelisted(ws, state->getRemoteIp()))
+        {
+            if (silent)
+                return;
+                
+            std::stringstream ss;
+            ss << "[Websocket][Handler] " << state->getRemoteIp() << " tried to connect, but it's not in whitelist";
+            _log(ss.str());
             return;
+        }
 
         _initializeClient(ws, state->getRemoteIp(), state->getRemotePort());
             
