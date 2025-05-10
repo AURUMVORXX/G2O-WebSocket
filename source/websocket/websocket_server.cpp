@@ -215,7 +215,7 @@ void WebsocketServer::Stop()
         _serverThread.join();
 
     delete _server;
-    ix::uninitNetSystem();
+    _server = nullptr;
     
     std::stringstream ss;
     ss << "[Websocket][Start] Listening on " << port << " has been stopped";

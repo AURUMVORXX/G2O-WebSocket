@@ -12,7 +12,10 @@ extern "C" SQRESULT SQRAT_API sqmodule_load(HSQUIRRELVM vm, HSQAPI api)
 {
 	SqModule::Initialize(vm, api);
 	WebsocketBase::Init();
+	
+#ifdef WIN32
 	ix::initNetSystem();
+#endif
 	
 	Sqrat::Object serverSide = Sqrat::ConstTable(vm).GetSlot("SERVER_SIDE");
 	
