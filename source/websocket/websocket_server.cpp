@@ -10,13 +10,11 @@
 
 WebsocketServer::WebsocketServer()
 {
-    _server = new ix::WebSocketServer(port, "0.0.0.0");
 }
 
 WebsocketServer::~WebsocketServer()
 {
     Stop();
-    delete _server;
 }
 
 std::vector<WSClient>::iterator WebsocketServer::_findClient(ix::WebSocket* ws)
@@ -167,6 +165,7 @@ void WebsocketServer::Start()
         return;
     }
     
+    _server = new ix::WebSocketServer(port, "0.0.0.0");
     _server->setTLSOptions(_getTLSOptions());
     
     _server->setOnClientMessageCallback(
