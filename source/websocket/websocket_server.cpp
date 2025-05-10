@@ -208,8 +208,15 @@ void WebsocketServer::Stop()
     if (!_running)
         return;
 
+    for (auto it = _connectedClients.begin(); it != _connectedClients.end(); it++)
+        it->socket->close(ix::WebSocketCloseConstants::kNormalClosureCode, "Server shutdown");
+
     _server->stop();
     WebsocketBase::Stop();
+    
+    _connectedClients.clear();
+    _topics.clear();
+    
     if (_serverThread.joinable())
         _serverThread.join();
 
