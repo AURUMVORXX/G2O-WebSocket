@@ -10,6 +10,9 @@
 
 extern "C" SQRESULT SQRAT_API sqmodule_load(HSQUIRRELVM vm, HSQAPI api)
 {
+	std::ios_base::sync_with_stdio(true);
+	setvbuf(stdout, nullptr, _IONBF, 0);
+	
 	SqModule::Initialize(vm, api);
 	WebsocketBase::Init();
 	

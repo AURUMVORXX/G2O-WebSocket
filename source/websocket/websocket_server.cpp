@@ -129,7 +129,7 @@ void WebsocketServer::_MessageHandler(std::shared_ptr<ix::ConnectionState> state
         _log(ss.str());
         
         if (!onOpenHandler.IsNull())
-            onOpenHandler.Execute(ws->getUrl());
+            onOpenHandler(ws->getUrl());
     }
     
     else if (msgType == ix::WebSocketMessageType::Close)
@@ -142,14 +142,16 @@ void WebsocketServer::_MessageHandler(std::shared_ptr<ix::ConnectionState> state
         _log(ss.str());
         
         if (!onCloseHandler.IsNull())
-            onCloseHandler.Execute(ws->getUrl(), message);
+            onCloseHandler(ws->getUrl(), message);
     }
     
     else if (msgType == ix::WebSocketMessageType::Message)
     {
         std::string url = ws->getUrl();
+        
+
         if (!onMessageHandler.IsNull())
-            onMessageHandler.Execute(ws->getUrl(), message);
+            onMessageHandler(ws->getUrl(), message);
     }
 }
 

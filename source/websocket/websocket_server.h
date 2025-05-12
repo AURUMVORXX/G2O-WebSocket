@@ -60,7 +60,7 @@ public:
     bool GetRunning() { return _running; }
     
     bool silent{false};
-    int port{8080};
+    int port{8675};
     
     bool disableHostnameValidation{false};
     std::string certificateFilePath{""};
