@@ -11,7 +11,7 @@
 WebsocketClient::WebsocketClient()
 {
     _client = new ix::WebSocket();
-    _client->setPingInterval(30);
+    _client->setPingInterval(1);
     _client->setOnMessageCallback(
         [this](const ix::WebSocketMessagePtr& msg)
         {
