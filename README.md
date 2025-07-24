@@ -61,6 +61,7 @@ class WebsocketClient
     string certFile;                                    // Path to certificate file
     string keyFile;                                     // Path to key file
     string caFile;                                      // Path to CA file
+    table headers;                                      // Extra headers
     
     void start();                                       // Starts client with given settings
     void stop();                                        // Stops client

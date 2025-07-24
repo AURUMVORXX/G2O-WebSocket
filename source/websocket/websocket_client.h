@@ -25,6 +25,7 @@ public:
     
     bool silent{false};
     bool disableHostnameValidation{false};
+    Sqrat::Table headers;
     std::string certificateFilePath{""};
     std::string keyFilePath{""};
     std::string caFilePath{"NONE"};

@@ -71,6 +71,7 @@ extern "C" SQRESULT SQRAT_API sqmodule_load(HSQUIRRELVM vm, HSQAPI api)
 	.Var("certFile", &WebsocketClient::certificateFilePath)
 	.Var("keyFile", &WebsocketClient::keyFilePath)
 	.Var("caFile", &WebsocketClient::caFilePath)
+    .Var("headers", &WebsocketClient::headers)
 	
 	.Var("onOpen", &WebsocketClient::onOpenHandler)
 	.Var("onClose", &WebsocketClient::onCloseHandler)

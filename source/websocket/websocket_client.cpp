@@ -38,9 +38,27 @@ void WebsocketClient::Start()
         _log("[Websocket][Start] Client is already running");
         return;
     }
+
+    ix::WebSocketHttpHeaders ws_headers;
+    Sqrat::Object::iterator it;
+    while (headers.Next(it))
+    {
+        HSQOBJECT obj_key = it.getKey();
+        Sqrat::string key = sq_objtostring(&obj_key);
+        if (key == "")
+            continue;
+
+        HSQOBJECT obj_value = it.getValue();
+        Sqrat::string value = sq_objtostring(&obj_value);
+        if (value == "")
+            continue;
+
+        ws_headers[key] = value;
+    }
     
     _client->setUrl(_url);
     _client->setTLSOptions(_getTLSOptions());
+    _client->setExtraHeaders(ws_headers);
     
     WebsocketBase::Start();
     _client->start();

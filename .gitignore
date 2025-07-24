@@ -7,6 +7,9 @@ desktop.ini
 /build/
 /out/
 /vcpkg/
+/.cache/
+
+compile_commands.json
 
 # Visual Studio
 
